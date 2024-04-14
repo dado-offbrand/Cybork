@@ -22,6 +22,12 @@ CybergearCanInterfaceMcp interface;
 void setup() {
   M5.begin();
 
+  M5.Lcd.print("Init sprite ... ");
+  sprite.setColorDepth(8);
+  sprite.setTextSize(3);
+  sprite.createSprite(M5.Lcd.width(), M5.Lcd.height());
+  M5.Lcd.println("done");
+
   M5.Lcd.print("Init systems ... ");
   interface.init(12, 15);
   driver.init(&interface);
@@ -35,6 +41,8 @@ void loop() {
   
   if (M5.BtnA.wasPressed()) {
     driver.reset_motor(); // disables
+  } else if (M5.BtnB.wasPressed()) {
+    driver.set_mech_position_to_zero();
   } else if (M5.BtnC.wasPressed()) {
     driver.enable_motor();  
   }
