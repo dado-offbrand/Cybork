@@ -8,12 +8,13 @@
 #include "cybergear_can_interface_mcp.hh"
 #endif
 
-#define UPPER_LEG_CALIB_EFFORT 0.5
 #define MAX_ROTATION 2.9 //165deg-ish
 #define MIN_ROTATION -2 // -120deg-ish
 
 uint8_t MOTOR_ID = 0x7E; // STILL NEEDS UPDATED
 MotorStatus motor_status;
+float target_position = 0.0f;
+float target_torque = 0.0f;
 
 CybergearDriver driver = CybergearDriver(0x00, MOTOR_ID);
 #ifdef USE_ESP32_CAN
@@ -22,41 +23,45 @@ CybergearCanInterfaceEsp32 interface;
 CybergearCanInterfaceMcp interface;
 #endif
 
+TFT_eSprite sprite = TFT_eSprite(&sprite);
+
 void setup() {
   M5.begin();
 
-  M5.Lcd.print("Init systems ... ");
+  M5.Lcd.print("Init sprite ... ");
+  sprite.setColorDepth(8);
+  sprite.setTextSize(3);
+  sprite.createSprite(M5.Lcd.width(), M5.Lcd.height());
+  M5.Lcd.println("done");
+  delay(200);
+
+  M5.Lcd.print("Init driver ... ");
   interface.init(12, 15);
   driver.init(&interface);
-  driver.init_motor(MODE_POSITION);
-  driver.set_limit_speed(0.5f);
   M5.Lcd.println("done");
-
-  M5.Lcd.print("Finding 180deg point ... ");
-
-  M5.Lcd.println("Done");
-}
-
-void loop() {
-  M5.update();
-  
-  if (M5.BtnA.wasPressed()) {
-    
-  } else if (M5.BtnB.wasPressed()) {
-    driver.reset_motor();
-  else if (M5.BtnC.wasPressed()) {
-    driver.enable_motor();  
-  }
-
-  if (driver.process_packet()) {
-    motor_status = driver.get_motor_status();
-    draw_display();
-  }
-
   delay(200);
+  
+  M5.Lcd.print("Finding 180deg point ... ");
+  driver.init_motor(MODE_SPEED);
+  driver.set_speed_ref(0.25f); // not specific, just a random speed
+  driver.enable_motor();
+  delay(100); // avoid effort spikes?
+
+  // motor stats may not be updating?
+  do {
+    if (driver.process_packet()) {
+      motor_status = driver.get_motor_status();
+      draw_stats();
+    }
+    delay(200);
+  } while (motor_status.effort <= 0.2f);
+  driver.set_speed_ref(0.0f);
+  driver.reset_motor();
+
+  M5.Lcd.println("done");
 }
 
-void draw_display() {
+void draw_stats() {
   sprite.fillScreen(BLACK);
   sprite.setCursor(0, 0);
   sprite.setTextColor(TFT_WHITE, BLACK);
@@ -72,7 +77,26 @@ void draw_display() {
   sprite.println("");
   sprite.println("Effort:");
   sprite.print(motor_status.effort);
-  sprite.println(" NM");
+  sprite.println(" Nm");
 
   sprite.pushSprite(0, 0);
+}
+
+void loop() {
+  M5.update();
+  
+  if (M5.BtnA.wasPressed()) {
+    driver.reset_motor();
+  } else if (M5.BtnB.wasPressed()) {
+    driver.reset_motor();
+  } else if (M5.BtnC.wasPressed()) {
+    driver.enable_motor();  
+  }
+
+  if (driver.process_packet()) {
+    motor_status = driver.get_motor_status();
+    draw_stats();
+  }
+
+  delay(200);
 }
