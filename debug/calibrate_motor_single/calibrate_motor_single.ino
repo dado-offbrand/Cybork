@@ -11,10 +11,8 @@
 #define MAX_ROTATION 2.9 //165deg-ish
 #define MIN_ROTATION -2 // -120deg-ish
 
-uint8_t MOTOR_ID = 0x7E; // STILL NEEDS UPDATED
+uint8_t MOTOR_ID = 0x7E;
 MotorStatus motor_status;
-float target_position = 0.0f;
-float target_torque = 0.0f;
 bool calib = false;
 
 CybergearDriver driver = CybergearDriver(0x00, MOTOR_ID);
@@ -39,19 +37,14 @@ void setup() {
   M5.Lcd.print("Init driver ... ");
   interface.init(12, 15);
   driver.init(&interface);
-  M5.Lcd.println("done");
-  delay(200);
-  
-  M5.Lcd.print("Finding 180deg point ... ");
   driver.init_motor(MODE_SPEED);
-  driver.set_speed_ref(0.25f); // not specific, just a random speed
+  driver.set_limit_speed(30.0f);
   driver.enable_motor();
-  delay(100); // avoid effort spikes?
-
-  // motor stats may not be updating?
-  
-
+  driver.set_limit_speed(1.0f); // is initializing with max speed necessary?
+  driver.set_speed_ref(0.25f); // not specific, just a random speed
   M5.Lcd.println("done");
+
+  draw_stats();
 }
 
 void draw_stats() {
@@ -71,6 +64,9 @@ void draw_stats() {
   sprite.println("Effort:");
   sprite.print(motor_status.effort);
   sprite.println(" Nm");
+  sprite.println("");
+  sprite.println("Calibrated:");
+  sprite.println(calib);
 
   sprite.pushSprite(0, 0);
 }
@@ -78,18 +74,13 @@ void draw_stats() {
 void loop() {
   M5.update();
 
-  if (calib) {
-    do {
-      if (driver.process_packet()) {
-        motor_status = driver.get_motor_status();
-        draw_stats();
-      }
-      delay(100);
-    } while (motor_status.effort <= 0.2f);
-    driver.set_speed_ref(0.0f);
-    driver.init_motor(MODE_POSITION);
-    // set zero, move motor back
-    calib = true;
+  if (!calib) { // set to !calib, just changed for debugging 
+    if (motor_status.effort >= 0.2f) {
+      driver.set_speed_ref(0.0f);
+      driver.set_mech_position_to_zero();
+      driver.init_motor(MODE_POSITION);
+      calib = true;
+    }
   }
   
   if (M5.BtnA.wasPressed()) {
