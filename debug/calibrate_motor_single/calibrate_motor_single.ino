@@ -15,6 +15,7 @@ uint8_t MOTOR_ID = 0x7E; // STILL NEEDS UPDATED
 MotorStatus motor_status;
 float target_position = 0.0f;
 float target_torque = 0.0f;
+bool calib = false;
 
 CybergearDriver driver = CybergearDriver(0x00, MOTOR_ID);
 #ifdef USE_ESP32_CAN
@@ -48,15 +49,7 @@ void setup() {
   delay(100); // avoid effort spikes?
 
   // motor stats may not be updating?
-  do {
-    if (driver.process_packet()) {
-      motor_status = driver.get_motor_status();
-      draw_stats();
-    }
-    delay(200);
-  } while (motor_status.effort <= 0.2f);
-  driver.set_speed_ref(0.0f);
-  driver.reset_motor();
+  
 
   M5.Lcd.println("done");
 }
@@ -84,6 +77,20 @@ void draw_stats() {
 
 void loop() {
   M5.update();
+
+  if (calib) {
+    do {
+      if (driver.process_packet()) {
+        motor_status = driver.get_motor_status();
+        draw_stats();
+      }
+      delay(100);
+    } while (motor_status.effort <= 0.2f);
+    driver.set_speed_ref(0.0f);
+    driver.init_motor(MODE_POSITION);
+    // set zero, move motor back
+    calib = true;
+  }
   
   if (M5.BtnA.wasPressed()) {
     driver.reset_motor();
