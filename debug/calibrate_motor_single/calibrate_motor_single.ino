@@ -11,11 +11,12 @@
 #define MAX_ROTATION 2.9 //165deg-ish
 #define MIN_ROTATION -2 // -120deg-ish
 
-uint8_t MOTOR_ID = 0x7E;
+float target_pos = 0.0f;
 MotorStatus motor_status;
-bool calib = false;
+bool caliS1 = false;
+bool caliS2 = false;
 
-CybergearDriver driver = CybergearDriver(0x00, MOTOR_ID);
+CybergearDriver driver = CybergearDriver(0x00, 0x7E);
 #ifdef USE_ESP32_CAN
 CybergearCanInterfaceEsp32 interface;
 #else
@@ -40,8 +41,6 @@ void setup() {
   driver.init_motor(MODE_SPEED);
   driver.set_limit_speed(30.0f);
   driver.enable_motor();
-  driver.set_limit_speed(1.0f); // is initializing with max speed necessary?
-  driver.set_speed_ref(0.25f); // not specific, just a random speed
   M5.Lcd.println("done");
 
   draw_stats();
@@ -53,7 +52,7 @@ void draw_stats() {
   sprite.setTextColor(TFT_WHITE, BLACK);
 
   sprite.setTextSize(4);
-  sprite.println(MOTOR_ID);
+  sprite.println(0x7E);
 
   sprite.setTextSize(2);
   sprite.println("");
@@ -66,7 +65,8 @@ void draw_stats() {
   sprite.println(" Nm");
   sprite.println("");
   sprite.println("Calibrated:");
-  sprite.println(calib);
+  sprite.println(caliS1);
+  sprite.println(caliS2);
 
   sprite.pushSprite(0, 0);
 }
@@ -74,21 +74,36 @@ void draw_stats() {
 void loop() {
   M5.update();
 
-  if (!calib) { // set to !calib, just changed for debugging 
-    if (motor_status.effort >= 0.2f) {
+  if (!caliS1) { // set to !calib, just changed for debugging
+    driver.set_speed_ref(0.7f); // not specific, just a random speed
+    if (motor_status.effort >= 0.3f) {
       driver.set_speed_ref(0.0f);
       driver.set_mech_position_to_zero();
+
       driver.init_motor(MODE_POSITION);
-      calib = true;
+      driver.set_limit_speed(2.5f);
+      driver.enable_motor();
+
+      caliS1 = true;
     }
+  } else if (caliS1 && !caliS2) {
+    driver.set_position_ref(-M_PI); // 180.0f / 180.0f * M_PI is just M_PI
+    // if within two degrees, just zero
+    if (std::fabs(motor_status.position - target_pos) < 2.0f / 180.0f * M_PI) {
+      delay(200);
+      driver.set_mech_position_to_zero();
+      caliS2 = true;
+    }
+  } else {
+    driver.set_position_ref(target_pos);
   }
-  
+
   if (M5.BtnA.wasPressed()) {
-    driver.reset_motor();
+    target_pos -= 20.0f / 180.0f * M_PI;
   } else if (M5.BtnB.wasPressed()) {
     driver.reset_motor();
   } else if (M5.BtnC.wasPressed()) {
-    driver.enable_motor();  
+    target_pos += 20.0f / 180.0f * M_PI;
   }
 
   if (driver.process_packet()) {
