@@ -80,18 +80,19 @@ void loop() {
       driver.set_speed_ref(0.0f);
       driver.set_mech_position_to_zero();
 
+      delay(100);
       driver.init_motor(MODE_POSITION);
-      driver.set_limit_speed(2.5f);
       driver.enable_motor();
+      driver.set_limit_speed(2.5f);
 
       caliS1 = true;
     }
   } else if (caliS1 && !caliS2) {
-    driver.set_position_ref(-M_PI); // 180.0f / 180.0f * M_PI is just M_PI
+    driver.set_position_ref(-3.14f);
     // if within two degrees, just zero
-    if (std::fabs(motor_status.position - target_pos) < 10.0f / 180.0f * M_PI) {
-      driver.set_limit_speed(0.5f);
-      delay(500);
+    if (std::fabs(motor_status.position - -3.14f) < (10.0f / 180.0f * M_PI)) {
+      driver.set_limit_speed(1.0f);
+      delay(1000);
       driver.set_mech_position_to_zero();
       caliS2 = true;
     }
@@ -102,7 +103,7 @@ void loop() {
   if (M5.BtnA.wasPressed()) {
     target_pos -= 20.0f / 180.0f * M_PI;
   } else if (M5.BtnB.wasPressed()) {
-    driver.reset_motor();
+    target_pos = 0.0f;
   } else if (M5.BtnC.wasPressed()) {
     target_pos += 20.0f / 180.0f * M_PI;
   }
