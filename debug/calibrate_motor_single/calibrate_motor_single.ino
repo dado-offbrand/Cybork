@@ -39,7 +39,7 @@ void setup() {
   interface.init(12, 15);
   driver.init(&interface);
   driver.init_motor(MODE_SPEED);
-  driver.set_limit_speed(30.0f);
+  driver.set_limit_speed(30.0f); // necessary?
   driver.enable_motor();
   M5.Lcd.println("done");
 
@@ -89,8 +89,9 @@ void loop() {
   } else if (caliS1 && !caliS2) {
     driver.set_position_ref(-M_PI); // 180.0f / 180.0f * M_PI is just M_PI
     // if within two degrees, just zero
-    if (std::fabs(motor_status.position - target_pos) < 2.0f / 180.0f * M_PI) {
-      delay(200);
+    if (std::fabs(motor_status.position - target_pos) < 10.0f / 180.0f * M_PI) {
+      driver.set_limit_speed(0.5f);
+      delay(500);
       driver.set_mech_position_to_zero();
       caliS2 = true;
     }
