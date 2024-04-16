@@ -8,7 +8,6 @@
 #include "cybergear_can_interface_mcp.hh"
 #endif
 
-#define ENDSTOP_EFFORT_MAX 0.3
 #define CALIBRATION_SPEED 2.0
 #define NORMAL_SPEED 30.0
 #define MAX_ROTATION 2.9 //165deg-ish
@@ -44,33 +43,40 @@ void setup() {
   driver.enable_motor();
   M5.Lcd.println("done");
 
-  M5.Lcd.print("Move to endstop ... ");
-  while (motor_status.effort <= ENDSTOP_EFFORT_MAX) {
+  M5.Lcd.print("Calibrate motor ... ");
+  calibrate_motor(0.3f, -180.0f);
+  M5.Lcd.println("done");
+
+  delay(2000);
+  driver.set_limit_speed(NORMAL_SPEED); // normal motor speed
+}
+
+void calibrate_motor(float endstop_effort_max, int degrees_from_endstop) {
+  // move to endstop
+  while (motor_status.effort <= endstop_effort_max) {
     M5.update();
     driver.set_speed_ref(0.7f);
     update_status();
   }
 
+  // calibrate at endstop
   driver.set_speed_ref(0.0f);
   driver.set_mech_position_to_zero();
   delay(100);
-  M5.Lcd.println("done");
-
-  M5.Lcd.print("Move to zero ... ");
   driver.init_motor(MODE_POSITION);
   driver.enable_motor();
-  while (std::fabs(motor_status.position - -3.14f) > (10.0f / 180.0f * M_PI)) {
+  
+  // move to center
+  float target = degrees_from_endstop / 180.0f * M_PI;
+  while (std::fabs(motor_status.position - target) > (10.0f / 180.0f * M_PI)) {
     M5.update();
-    driver.set_position_ref(-3.14f);
+    driver.set_position_ref(target);
     update_status();
   }
-  
+
+  // zero at center
   delay(1000);
   driver.set_mech_position_to_zero();
-  M5.Lcd.println("done");
-
-  delay(2000);
-  driver.set_limit_speed(NORMAL_SPEED); // normal motor speed
 }
 
 void draw_stats() {
