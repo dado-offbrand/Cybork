@@ -8,13 +8,12 @@
 #include "cybergear_can_interface_mcp.hh"
 #endif
 
+#define ENDSTOP_EFFORT_MAX 0.3
 #define MAX_ROTATION 2.9 //165deg-ish
 #define MIN_ROTATION -2 // -120deg-ish
 
 float target_pos = 0.0f;
 MotorStatus motor_status;
-bool caliS1 = false;
-bool caliS2 = false;
 
 CybergearDriver driver = CybergearDriver(0x00, 0x7E);
 #ifdef USE_ESP32_CAN
@@ -39,11 +38,38 @@ void setup() {
   interface.init(12, 15);
   driver.init(&interface);
   driver.init_motor(MODE_SPEED);
-  driver.set_limit_speed(30.0f); // necessary?
+  driver.set_limit_speed(2.5f); // for motor calibration
   driver.enable_motor();
   M5.Lcd.println("done");
 
-  draw_stats();
+  M5.Lcd.print("Move to endstop ... ");
+  while (motor_status.effort <= ENDSTOP_EFFORT_MAX) {
+    M5.update();
+    driver.set_speed_ref(0.7f);
+    update_status();
+  }
+
+  driver.set_speed_ref(0.0f);
+  driver.set_mech_position_to_zero();
+  delay(100);
+  M5.Lcd.println("done");
+
+  M5.Lcd.print("Move to zero ... ");
+  driver.init_motor(MODE_POSITION);
+  driver.enable_motor();
+  while (std::fabs(motor_status.position - -3.14f) > (10.0f / 180.0f * M_PI)) {
+    M5.update();
+    driver.set_position_ref(-3.14f);
+    update_status();
+  }
+  
+  driver.set_limit_speed(0.5f);
+  delay(1000); // enough time?
+  driver.set_mech_position_to_zero();
+  M5.Lcd.println("done");
+
+  delay(100);
+  driver.set_limit_speed(30.0f); // normal motor speed
 }
 
 void draw_stats() {
@@ -64,41 +90,19 @@ void draw_stats() {
   sprite.print(motor_status.effort);
   sprite.println(" Nm");
   sprite.println("");
-  sprite.println("Calibrated:");
-  sprite.println(caliS1);
-  sprite.println(caliS2);
 
   sprite.pushSprite(0, 0);
 }
 
+void update_status() {
+  if (driver.process_packet()) {
+    motor_status = driver.get_motor_status();
+    draw_stats();
+  }  
+}
+
 void loop() {
   M5.update();
-
-  if (!caliS1) { // set to !calib, just changed for debugging
-    driver.set_speed_ref(0.7f); // not specific, just a random speed
-    if (motor_status.effort >= 0.3f) {
-      driver.set_speed_ref(0.0f);
-      driver.set_mech_position_to_zero();
-
-      delay(100);
-      driver.init_motor(MODE_POSITION);
-      driver.enable_motor();
-      driver.set_limit_speed(2.5f);
-
-      caliS1 = true;
-    }
-  } else if (caliS1 && !caliS2) {
-    driver.set_position_ref(-3.14f);
-    // if within two degrees, just zero
-    if (std::fabs(motor_status.position - -3.14f) < (10.0f / 180.0f * M_PI)) {
-      driver.set_limit_speed(1.0f);
-      delay(1000);
-      driver.set_mech_position_to_zero();
-      caliS2 = true;
-    }
-  } else {
-    driver.set_position_ref(target_pos);
-  }
 
   if (M5.BtnA.wasPressed()) {
     target_pos -= 20.0f / 180.0f * M_PI;
@@ -108,10 +112,9 @@ void loop() {
     target_pos += 20.0f / 180.0f * M_PI;
   }
 
-  if (driver.process_packet()) {
-    motor_status = driver.get_motor_status();
-    draw_stats();
-  }
+  driver.set_position_ref(target_pos);
+  
+  update_status();
 
   delay(200);
 }
