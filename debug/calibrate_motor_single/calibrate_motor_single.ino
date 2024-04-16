@@ -9,6 +9,8 @@
 #endif
 
 #define ENDSTOP_EFFORT_MAX 0.3
+#define CALIBRATION_SPEED 2.0
+#define NORMAL_SPEED 30.0
 #define MAX_ROTATION 2.9 //165deg-ish
 #define MIN_ROTATION -2 // -120deg-ish
 
@@ -38,7 +40,7 @@ void setup() {
   interface.init(12, 15);
   driver.init(&interface);
   driver.init_motor(MODE_SPEED);
-  driver.set_limit_speed(2.5f); // for motor calibration
+  driver.set_limit_speed(CALIBRATION_SPEED); // for motor calibration
   driver.enable_motor();
   M5.Lcd.println("done");
 
@@ -63,13 +65,12 @@ void setup() {
     update_status();
   }
   
-  driver.set_limit_speed(0.5f);
-  delay(1000); // enough time?
+  delay(1000);
   driver.set_mech_position_to_zero();
   M5.Lcd.println("done");
 
-  delay(100);
-  driver.set_limit_speed(30.0f); // normal motor speed
+  delay(2000);
+  driver.set_limit_speed(NORMAL_SPEED); // normal motor speed
 }
 
 void draw_stats() {
