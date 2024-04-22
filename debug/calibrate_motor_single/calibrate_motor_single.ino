@@ -44,7 +44,7 @@ void setup() {
   M5.Lcd.println("done");
 
   M5.Lcd.print("Calibrate motor ... ");
-  calibrate_motor(0.3f, -180.0f);
+  calibrate_motor(0.3f, -90.0f);
   M5.Lcd.println("done");
 
   delay(2000);
