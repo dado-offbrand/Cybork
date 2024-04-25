@@ -12,7 +12,7 @@
 #define NORMAL_SPEED 30.0
 #define MAX_ROTATION 2.9 //165deg-ish
 #define MIN_ROTATION -2 // -120deg-ish
-#define LL_REDUCTION 1.1464 // 1.14635639927
+#define LL_REDUCTION 0.8724 // 0.87247228529451
 // 32.66 and 37.44, big pulley is for motor
 
 float target_pos = 0.0f;
@@ -70,7 +70,7 @@ void calibrate_motor(float endstop_effort_max, int degrees_from_endstop, bool re
   
   // move to center
   float target = degrees_from_endstop / 180.0f * M_PI;
-  if (reduced) { target/=LL_REDUCTION; }
+  if (reduced) { target*=LL_REDUCTION; }
   while (std::fabs(motor_status.position - target) > (10.0f / 180.0f * M_PI)) {
     M5.update();
     driver.set_position_ref(target);
@@ -122,7 +122,7 @@ void loop() {
     target_pos += 20.0f / 180.0f * M_PI;
   }
 
-  driver.set_position_ref(target_pos);
+  driver.set_position_ref(target_pos*LL_REDUCTION);
   
   update_status();
 
