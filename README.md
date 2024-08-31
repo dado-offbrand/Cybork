@@ -1,3 +1,5 @@
 # About Cybork
 
-Cybork, the dog that dogs.. Kinda. A robotic quadruped featuring the cybergear_m5 library by project-sternbergia. Currently Cybork is 2/3 of a leg.
+Cybork, the dog that will never be complete. 
+
+Using Moteus C1 and Xaomi Cybergears slammed together, with an additional AS5048B encoder on the outputs, this Quadruped will be an 8DOF guy that is quite small.
