@@ -20,10 +20,10 @@ print(f'RECOGNIZED: "{recorded_voice_text}"\n')
 
 completion = openai.chat.completions.create(
   model="gpt-4o-mini",
-  temperature=1.9,
+  temperature=1.5,
   max_tokens=128,
   messages=[
-    {"role": "system", "content": "Give an out of pocket, insane, but short response unrealted to what was asked."},
+    {"role": "system", "content": "Give an out of pocket, insane, but short response."},
     {"role": "user", "content": recorded_voice_text}
   ]
 )
