@@ -27,7 +27,6 @@ def record_audio(filename):
 
     try:
         while True:
-            # Read raw audio data from the microphone
             buffer = stream.read(CHUNK, exception_on_overflow=False)
 
             if vad.is_speech(buffer, RATE):
@@ -40,23 +39,20 @@ def record_audio(filename):
 
             else:
                 if recording:
-                    # Increment silence counter
                     silence_count += 1
 
-                    # If silence lasts for more than a few chunks, stop recording
-                    if silence_count > 30:  # Adjust for how many chunks of silence you want before stopping
+                    if silence_count > 30: # silence measured in chunks
                         #print("Silence detected, stopping recording...")
                         break
 
     except KeyboardInterrupt:
         pass
 
-    # Stop recording and save the file
+    # Stop recording and save the data to .wav file
     stream.stop_stream()
     stream.close()
     audio.terminate()
 
-    # Save audio data to a .wav file
     audio_data = b''.join(frames)
     audio_array = np.frombuffer(audio_data, dtype=np.int16)
     write(filename, RATE, audio_array)
