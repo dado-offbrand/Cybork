@@ -1,0 +1,12 @@
+github desktop stuff:
+git add --all
+OR
+git add file1path file2path
+git commit -m "msg here"
+git push
+
+ssh stuff:
+ssh username@username.local
+
+pull repo for first time to get all files:
+git clone https://github.com/dado-offbrand/Cybork.git
