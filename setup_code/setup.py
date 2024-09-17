@@ -17,9 +17,14 @@ def setup():
     else:
         print("Ignoring initial updater.py setup because file was already moved / doesn't exist.")
 
+    # set up AP with borrowed script (will this even work?)
+    run('sudo chmod +x setup.sh')
+    run('./setup.sh')
+    
+
     # insert other setup stuff here
 
-    print("Setup complete!")
+    print("Setup complete! Please reboot.") # for testing, automatic rebooting will have to be done alter
 
 if __name__=="__main__":
     setup()
