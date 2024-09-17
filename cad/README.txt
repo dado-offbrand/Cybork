@@ -1,2 +1,0 @@
-switched to Onshape which no longer requires me to store my own files
-link to main project: https://cad.onshape.com/documents/cbc7a7f2d4f5f9038a8abd3f/w/119c4b8c8689016b377f03cd/e/72c0bcff1e9c329c9e658c29?renderMode=0&uiState=66d31793f37c4039346f96b1
