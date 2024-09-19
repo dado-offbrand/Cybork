@@ -12,7 +12,7 @@ CHUNK = int(RATE * CHUNK_DURATION_MS / 1000)
 
 # init vad
 vad = webrtcvad.Vad()
-vad.set_mode(1) # 0: Normal, 1: Low Bitrate, 2: Aggressive, 3: Very Aggressive
+vad.set_mode(3) # 0: Normal, 1: Low Bitrate, 2: Aggressive, 3: Very Aggressive
 
 # init misc audio
 audio = pyaudio.PyAudio()
