@@ -20,15 +20,15 @@ print(f'RECOGNIZED: "{recorded_voice_text}"\n')
 
 completion = openai.chat.completions.create(
   model="gpt-4o-mini",
-  temperature=1.5,
+  #temperature=1.5, #temperature adjustment is only for "funny mode"
   max_tokens=128,
   messages=[
-    {"role": "system", "content": "Give an out of pocket, insane, but short response."},
+    {"role": "system", "content": "You are a physical robot in the real world. Your job is to create conversation, while giving out of pocket responses. Short responses only."},
     {"role": "user", "content": recorded_voice_text}
   ]
 )
 generated_response = completion.choices[0].message.content
-print(f'RESPONSE: "{generated_response}"')
+print(f'GENERATED RESPONSE: "{generated_response}"')
 
 # ai speech synthesis
 synthesis_path = "generated_speech/speech.mp3"
@@ -41,5 +41,5 @@ with openai.audio.speech.with_streaming_response.create(
 ) as response:
     response.stream_to_file(synthesis_path)
 
-print("RESPONDING: Saying something horrifying.")
+print("PLAYING RESPONSE: Saying something horrifying.")
 playsound.playsound(os.path.dirname(__file__) + "/" + synthesis_path)
