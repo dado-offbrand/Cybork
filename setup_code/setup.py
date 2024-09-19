@@ -3,6 +3,8 @@ import subprocess
 import shutil
 import os
 
+libs = "openai pyaudio scipy numpy webrtcvad asyncio moteus ADS1x15-ADC"
+
 def run(*args, **kwargs):
     print('running command: ' + args[0])
     subprocess.check_call(*args, shell=True, **kwargs)
@@ -16,6 +18,11 @@ def setup():
         shutil.move(updater_location, Path(cwd).parents[1])
     else:
         print("Ignoring initial updater.py setup because file was already moved / doesn't exist.")
+
+    # install necessary libraries for robot code
+    run(f'sudo apt-get install {libs}')
+    print("Did that work? Ctrl+C to quit, ENTER to continue")
+    input()
 
     # set up AP with borrowed script (will this even work?)
     run('sudo chmod +x setup.sh')
