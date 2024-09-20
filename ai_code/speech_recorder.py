@@ -12,7 +12,7 @@ CHUNK = int(RATE * CHUNK_DURATION_MS / 1000)
 
 # init vad
 vad = webrtcvad.Vad()
-vad.set_mode(3) # 0: Normal, 1: Low Bitrate, 2: Aggressive, 3: Very Aggressive
+vad.set_mode(1) # 0: Normal, 1: Low Bitrate, 2: Aggressive, 3: Very Aggressive
 
 # init misc audio
 audio = pyaudio.PyAudio()
@@ -31,7 +31,7 @@ def record_audio(filename):
 
             if vad.is_speech(buffer, RATE):
                 if not recording:
-                    #print("Speech detected, recording...")
+                    print("Speech detected, recording...")
                     recording = True
 
                 silence_count = 0
@@ -42,7 +42,7 @@ def record_audio(filename):
                     silence_count += 1
 
                     if silence_count > 30: # silence measured in chunks
-                        #print("Silence detected, stopping recording...")
+                        print("Silence detected, stopping recording...")
                         break
 
     except KeyboardInterrupt:
