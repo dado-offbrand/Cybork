@@ -3,7 +3,7 @@ import math
 upper_length =  5.038
 lower_length = 5.523267
 
-def inverse_kinematics(x, y):
+def calc_angles(x, y):
     D = math.sqrt(x ** 2 + y ** 2)
 
     # Knee
