@@ -3,7 +3,7 @@ import subprocess
 import shutil
 import os
 
-libs = "openai pyaudio scipy numpy webrtcvad asyncio moteus ADS1x15-ADC"
+libs = "openai pyaudio scipy numpy webrtcvad asyncio moteus adafruit-circuitpython-ads1x15"
 
 def run(*args, **kwargs):
     print('running command: ' + args[0])
