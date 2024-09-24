@@ -3,7 +3,7 @@ import subprocess
 import shutil
 import os
 
-libs = "openai pyaudio scipy numpy webrtcvad asyncio moteus adafruit-circuitpython-ads1x15"
+libs = "scipy numpy asyncio moteus"
 
 def run(*args, **kwargs):
     print('running command: ' + args[0])
@@ -23,11 +23,8 @@ def setup():
     run(f'sudo apt-get install {libs}')
     print("Did that work? Ctrl+C to quit, ENTER to continue")
     input()
-
-    # set up AP with borrowed script (will this even work?)
-    run('sudo chmod +x setup.sh')
-    run('./setup.sh')
     
+    # attempt to connect to controller AP
 
     # insert other setup stuff here
 
