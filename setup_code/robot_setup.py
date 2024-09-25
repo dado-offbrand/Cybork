@@ -3,7 +3,7 @@ import subprocess
 import shutil
 import os
 
-libs = "scipy numpy asyncio moteus"
+libs = "scipy numpy asyncio moteus" #is scipy needed?
 
 def run(*args, **kwargs):
     print('running command: ' + args[0])

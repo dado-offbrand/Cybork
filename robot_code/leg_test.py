@@ -14,11 +14,12 @@ async def main():
     await upper_controller.set_stop()
     await lower_controller.set_stop()
 
-    a, b = calc_angles(0, 5)
+    a, b = calc_angles(0, -5)
 
     result1 = await upper_controller.set_position(position=a, accel_limit=5.0)
     result2 = await lower_controller.set_position(position=b, accel_limit=5.0)
-    print(result)
+    print(result1)
+    print(result2)
 
 
 if __name__=="__main__":
