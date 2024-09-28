@@ -1,3 +1,4 @@
+from cybergear_defs import *
 import moteus
 import struct
 
@@ -34,28 +35,27 @@ def write_float_data(address, value, min, max):
 ######################
 
 def enable_motor():
-    send_command(0x7E, mjcanusb_id, 0x03, bytearray(8))
+    send_command(0x7E, mjcanusb_id, CMD_ENABLE, bytearray(8))
 
 def reset_motor():
-    send_command(0x7E, mjcanusb_id, 0x04, bytearray(8))
+    send_command(0x7E, mjcanusb_id, CMD_RESET, bytearray(8))
 
 def set_run_mode(run_mode):
     data = bytearray(8)
     data[0] = 0x7005 & 0x00FF # 0x7005 is defined as ADDR_RUN_MODE, address of run mode variable? idk
-    data[1] = 0x7005 >> 8
+    data[1] = 0x7005 >> 8 # do not define in defs for now, this is a different thing from run_mode value thats passed
     data[4] = run_mode
 
-    send_command(0x7E, mjcanusb_id, 0x12, data) #0x12 (or 18 as a byte) is the CMD_RAM_WRITE command
+    send_command(0x7E, mjcanusb_id, CMD_RAM_WRITE, data) #0x12 (or 18 as a byte) is the CMD_RAM_WRITE command
 
 def set_limit_speed(speed):
-    write_float_data(0x7017, speed, 0.0, 30.0) # 0x7017 is ADDR_LIMIT_SPEED, 30.0 is V_MAX
+    write_float_data(ADDR_LIMIT_SPEED, speed, 0.0, V_MAX)
 
 def set_position_ref(position):
-    write_float_data(0x7016, position, -12.5, 12.5) #0x7016 is ADDR_LOC_REF, -12.5 is P_MIN, is 12.5 P_MAX
+    write_float_data(ADDR_LOC_REF, position, P_MIN, P_MAX)
 
 # could totally maybee cause an infinite loop, who knows
 #def process_packet():
-
 
 ######################
 # TEST AREA
@@ -66,7 +66,7 @@ def main():
     
     # init_motor (includes resetting and setting mode to position)
     reset_motor()
-    set_run_mode(0x01) # MODE_POSITION is 0x01
+    set_run_mode(MODE_POSITION) # MODE_POSITION is 0x01
 
     # set limit speed, then finally enable motor  
     set_limit_speed(30.0)
