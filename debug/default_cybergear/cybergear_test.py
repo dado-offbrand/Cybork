@@ -5,7 +5,9 @@ import time
 import asyncio
 
 transport = moteus.Transport() # blank assumes mjcanusb?
-mjcanusb_id = 0xFF # just can id 255, no way this conflicts with anything, right??
+
+motor_id = 0x7F
+mjcanusb_id = 0x00 # according to Param Table in official app, CAN_MASTER was 0?
 
 ######################
 # UTIL COMMANDS
@@ -38,26 +40,17 @@ async def write_float_data(address, value, min, max):
     val = min if min > value else value # if anything goes wrong double check this first
     data[4:8] = struct.pack('f', val) # equivalent of "memcpy(&data[4], &value, 4); in cpp"?
 
-    await send_command(0x7F, mjcanusb_id, 0x12, data)
-
-async def process_packet():
-    check_update = False
-    #while True:
-        #if recieve_motor_data()
-
-async def recieve_motor_data():
-    #results = await transport.cycle()
-    print('wip')
+    await send_command(motor_id, mjcanusb_id, CMD_RAM_WRITE, data)
 
 ######################
 # DRIVER COMMANDS 
 ######################
 
 async def enable_motor():
-    await send_command(0x7F, mjcanusb_id, CMD_ENABLE, bytearray(8))
+    await send_command(motor_id, mjcanusb_id, CMD_ENABLE, bytearray(8))
 
 async def reset_motor():
-    await send_command(0x7F, mjcanusb_id, CMD_RESET, bytearray(8))
+    await send_command(motor_id, mjcanusb_id, CMD_RESET, bytearray(8))
 
 async def set_run_mode(run_mode):
     data = bytearray(8)
@@ -65,16 +58,13 @@ async def set_run_mode(run_mode):
     data[1] = ADDR_RUN_MODE >> 8
     data[4] = run_mode
 
-    await send_command(0x7F, mjcanusb_id, CMD_RAM_WRITE, data)
+    await send_command(motor_id, mjcanusb_id, CMD_RAM_WRITE, data)
 
 async def set_limit_speed(speed):
     await write_float_data(ADDR_LIMIT_SPEED, speed, 0.0, V_MAX)
 
 async def set_position_ref(position):
     await write_float_data(ADDR_LOC_REF, position, P_MIN, P_MAX)
-
-# could totally maybee cause an infinite loop, who knows
-#def process_packet():
 
 ######################
 # TEST AREA
@@ -94,15 +84,7 @@ async def main():
 
     # move motor with position mode
     target_position = 3 # if somehow magically nothing screams error but no movement, increase this value
-    
-    while True:
-        await set_position_ref(target_position)
-
-        
-
-    # then process packet annnd mayhbe thats supposed to be in a loop
-    #process_packet()
-
+    await set_position_ref(target_position)
 
 if __name__=="__main__":
     asyncio.run(main())
