@@ -2,3 +2,4 @@ ai_code/generated_speech/speech.mp3
 ai_code/generated_speech/speech.wav
 .idea
 ai_code/__pycache__
+debug/default_cybergear/__pycache__
