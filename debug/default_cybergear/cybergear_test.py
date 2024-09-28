@@ -42,11 +42,11 @@ def reset_motor():
 
 def set_run_mode(run_mode):
     data = bytearray(8)
-    data[0] = 0x7005 & 0x00FF # 0x7005 is defined as ADDR_RUN_MODE, address of run mode variable? idk
-    data[1] = 0x7005 >> 8 # do not define in defs for now, this is a different thing from run_mode value thats passed
+    data[0] = ADDR_RUN_MODE & 0x00FF
+    data[1] = ADDR_RUN_MODE >> 8
     data[4] = run_mode
 
-    send_command(0x7E, mjcanusb_id, CMD_RAM_WRITE, data) #0x12 (or 18 as a byte) is the CMD_RAM_WRITE command
+    send_command(0x7E, mjcanusb_id, CMD_RAM_WRITE, data)
 
 def set_limit_speed(speed):
     write_float_data(ADDR_LIMIT_SPEED, speed, 0.0, V_MAX)
@@ -62,8 +62,6 @@ def set_position_ref(position):
 ######################
 
 def main():
-    # Following control_mode_example.ino, it seems that there is a procedure to start a cybergear
-    
     # init_motor (includes resetting and setting mode to position)
     reset_motor()
     set_run_mode(MODE_POSITION) # MODE_POSITION is 0x01
