@@ -42,10 +42,11 @@ async def write_float_data(address, value, min, max):
 
 async def process_packet():
     check_update = False
-    while True:
-        if recieve_motor_data()
+    #while True:
+        #if recieve_motor_data()
 
 async def recieve_motor_data():
+    #results = await transport.cycle()
     print('wip')
 
 ######################
